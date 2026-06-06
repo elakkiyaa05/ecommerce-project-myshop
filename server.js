@@ -8,27 +8,33 @@ const Product = require("./models/Product");
 const Order = require("./models/Order");
 
 const app = express();
-app.get("/", (req, res) => {
-  res.send("Backend is running successfully 🚀");
-});
 
+// ================= MIDDLEWARE =================
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+
 app.use(express.json());
 
 const path = require("path");
 app.use(express.static(path.join(__dirname, "../frontend")));
+
+// ================= ROOT ROUTE =================
+app.get("/", (req, res) => {
+  res.send("Backend is running successfully 🚀");
+});
 
 // ================= CONNECT DB =================
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log("MongoDB Error:", err));
 
-// ================= PRODUCTS (FROM MONGODB) =================
-app.get("/products", async (req, res) => {
+// ================= PRODUCTS APIs =================
+
+// GET ALL PRODUCTS
+app.get("/api/products", async (req, res) => {
   try {
     const products = await Product.find();
     res.json(products);
@@ -37,8 +43,8 @@ app.get("/products", async (req, res) => {
   }
 });
 
-// OPTIONAL: ADD PRODUCT API (for testing)
-app.post("/products", async (req, res) => {
+// ADD PRODUCT
+app.post("/api/products", async (req, res) => {
   try {
     const product = new Product(req.body);
     await product.save();
@@ -49,16 +55,11 @@ app.post("/products", async (req, res) => {
 });
 
 // ================= ORDER API =================
-app.post("/order", async (req, res) => {
+app.post("/api/order", async (req, res) => {
   try {
-
     const { items, total } = req.body;
 
-    const order = new Order({
-      items,
-      total
-    });
-
+    const order = new Order({ items, total });
     await order.save();
 
     res.json({
@@ -67,15 +68,12 @@ app.post("/order", async (req, res) => {
     });
 
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
 // ================= USER APIs =================
-app.post("/signup", async (req, res) => {
+app.post("/api/signup", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -93,7 +91,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -109,7 +107,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// ================= START =================
 // ================= START =================
 const PORT = process.env.PORT || 5000;
 
