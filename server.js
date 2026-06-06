@@ -8,6 +8,9 @@ const Product = require("./models/Product");
 const Order = require("./models/Order");
 
 const app = express();
+app.get("/", (req, res) => {
+  res.send("Backend is running successfully 🚀");
+});
 
 app.use(cors({
   origin: "*",
